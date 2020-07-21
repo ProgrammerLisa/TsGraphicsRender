@@ -1,14 +1,48 @@
 const path = require('path')
 const webpack = require('webpack')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-console.log('process.env.NODE_ENV=' + process.env.NODE_ENV)
-console.log('process.env.BASE_API=' + process.env.BASE_API)
-console.log(process.env.npm_lifecycle_event)
+const MiniCssExtractPlugin = require('mini-css-extract-plugin') // 提取css到单独文件的插件
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin') // 压缩css插件
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin') // 压缩js文件
+const HtmlWebpackPlugin = require('html-webpack-plugin') // 把打包后的文件直接注入到html模板中
+const { CleanWebpackPlugin } = require('clean-webpack-plugin') // 每次运行前清理目录的插件
+
+let targetUrl = ''
+let plugins = []
+let optimization = {}
+
+switch (process.env.NODE_ENV) {
+  case 'development':
+    targetUrl = 'https://www.test.bizvane.cn'
+    break
+  case 'none':
+    targetUrl = 'https://www.uat.bizvane.cn'
+    break
+  case 'production':
+    targetUrl = 'https://crm.bizvane.com'
+    plugins = [
+      new MiniCssExtractPlugin({
+        filename: '[name][hash].css', // 都提到build目录下的css目录中
+        chunkFilename: '[id][hash].css'
+      })
+    ]
+    optimization = {
+      minimizer: [
+        new UglifyJsPlugin({
+          cache: true,
+          parallel: true,
+          sourceMap: true
+        }), // 压缩js的插件
+        new OptimizeCSSAssetsPlugin({}) // 压缩css的插件
+      ]
+    }
+    break
+}
+
 module.exports = {
   entry: './src/main.ts', // 入口文件 名字任取 注意路径是否正确
 
   output: {
-    filename: './bundle.js' // 自动会生成dist目录，因此可以去掉dist/目录
+    filename: 'bundle.js' // 自动会生成dist目录，因此可以去掉dist/目录
   },
 
   mode: process.env.NODE_ENV, // 设置为开发者模式
@@ -21,8 +55,15 @@ module.exports = {
 
   plugins: [
     // 再此可以添加各种插件
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.DefinePlugin({
+      ENV: JSON.stringify(process.env.NODE_ENV)
+    }),
+    new CleanWebpackPlugin(),
+    ...plugins
   ],
+
+  ...optimization,
 
   module: {
     rules: [
@@ -59,6 +100,19 @@ module.exports = {
 
     historyApiFallback: true, // 让所有404错误的页面定位到index.html
 
-    open: true // 启动服务器时，自动打开浏览器，默认为false
+    open: true, // 启动服务器时，自动打开浏览器，默认为false
+
+    publicPath: '/dist',
+
+    proxy: [
+      {
+        context: ['/serviceCard', '/centerstage', '/coupon', '/mktcenter', '/members', '/message', '/fitment', '/analyze', '/wechatEnterprise', '/api', '/behavior', '/customized'],
+        target: targetUrl,
+        changeOrigin: true
+      }
+    ]
   }
 }
+
+console.log(process.env.NODE_ENV)
+console.log(targetUrl)

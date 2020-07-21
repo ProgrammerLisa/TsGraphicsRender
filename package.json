@@ -5,11 +5,11 @@
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=development node_modules/.bin/webpack-dev-server",
-    "uat": "cross-env ENV=uat node_modules/.bin/webpack-dev-server",
-    "prd": "cross-env NODE_ENV=production node_modules/.bin/webpack-dev-server",
-    "watch": "cross-env NODE_ENV=development node_modules/.bin/webpack -w -p",
-    "build": "cross-env NODE_ENV=production node_modules/.bin/webpack -p"
+    "dev": "cross-env NODE_ENV=development webpack-dev-server",
+    "uat": "cross-env NODE_ENV=none webpack-dev-server",
+    "prd": "cross-env NODE_ENV=production webpack-dev-server",
+    "watch": "webpack -w -p",
+    "build": "webpack -p"
   },
   "repository": {
     "type": "git",
@@ -25,15 +25,19 @@
   "devDependencies": {
     "@types/node": "^14.0.24",
     "@types/webpack-env": "^1.15.2",
+    "clean-webpack-plugin": "^3.0.0",
     "cross-env": "^7.0.2",
     "css-loader": "^3.6.0",
     "html-webpack-plugin": "^4.3.0",
     "mini-css-extract-plugin": "^0.9.0",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
     "style-loader": "^1.2.1",
     "ts-loader": "^8.0.1",
     "typescript": "^3.9.7",
+    "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "webpack-merge": "^5.0.9"
   }
 }
